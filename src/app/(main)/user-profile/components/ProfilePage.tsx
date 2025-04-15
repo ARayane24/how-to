@@ -17,6 +17,7 @@ const ProfilePage = ({
   <PageWrapper
     title="Your Profile"
     subtitle="View and manage your profile information."
+    className="max-w-md"
   >
     <div className="bg-gray-800/50 rounded-xl p-6 space-y-6 shadow-lg border border-gray-700">
       <div className="flex items-center gap-4">
