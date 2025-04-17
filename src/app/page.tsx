@@ -7,8 +7,10 @@ import TopicCard from "./components/home__components/TopicCard";
 import FloatingButton from "./components/home__components/FloatingButton";
 import LaravelApiClient from "@/api-clients/laravel_client";
 import { XML } from "@/utils/xml";
+import { useRouter } from "next/navigation";
 
 const Home = () => {
+  const router = useRouter();
   const [topics, setTopics] = useState<Topic[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -59,7 +61,14 @@ const Home = () => {
       <PageWrapper title="Topics" subtitle="Quick view on recent topics">
         <div className="space-y-6">
           {topics.map((topic) => (
-            <TopicCard key={topic.id} topic={topic} topicScore={0} />
+            <TopicCard
+              key={topic.id}
+              topic={topic}
+              topicScore={0}
+              onClick={() => {
+                router.push(`/topic-details?topicId=${topic.id}`);
+              }}
+            />
           ))}
         </div>
       </PageWrapper>

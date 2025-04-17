@@ -8,9 +8,11 @@ import { Topic } from "@/models/topic";
 const TopicCard = ({
   topic,
   topicScore,
+  onClick,
 }: {
   topic: Topic;
   topicScore: number;
+  onClick?: () => void;
 }) => {
   const [score, setScore] = useState<number>(topicScore || 0); // assuming topic has `score` prop
 
@@ -19,6 +21,7 @@ const TopicCard = ({
 
   return (
     <motion.div
+      onClick={onClick}
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3 }}
