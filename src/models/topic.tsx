@@ -25,6 +25,17 @@ export class Topic {
       new Date(json.createdAt)
     );
   }
+
+  public static fromXML(xml: Element): Topic {
+    return new Topic(
+      parseInt(xml.getElementsByTagName("id")[0].textContent || "0"),
+      parseInt(xml.getElementsByTagName("idAccount")[0].textContent || "0"),
+      xml.getElementsByTagName("problem")[0].textContent || "",
+      xml.getElementsByTagName("description")[0].textContent || "",
+      new Date(xml.getElementsByTagName("updatedAt")[0].textContent || ""),
+      new Date(xml.getElementsByTagName("createdAt")[0].textContent || "")
+    );
+  }
 }
 
 export class SolutionStep {
@@ -51,6 +62,16 @@ export class SolutionStep {
       new Date(json.updatedAt)
     );
   }
+
+  public static fromXML(xml: Element): SolutionStep {
+    return new SolutionStep(
+      parseInt(xml.getElementsByTagName("id")[0].textContent || "0"),
+      parseInt(xml.getElementsByTagName("idTopic")[0].textContent || "0"),
+      xml.getElementsByTagName("title")[0].textContent || "",
+      xml.getElementsByTagName("description")[0].textContent || "",
+      new Date(xml.getElementsByTagName("updatedAt")[0].textContent || "")
+    );
+  }
 }
 
 export class Vote {
@@ -68,5 +89,14 @@ export class Vote {
     isPositive: boolean;
   }): Vote {
     return new Vote(json.id, json.idTopic, json.idAccount, json.isPositive);
+  }
+
+  public static fromXML(xml: Element): Vote {
+    return new Vote(
+      parseInt(xml.getElementsByTagName("id")[0].textContent || "0"),
+      parseInt(xml.getElementsByTagName("idTopic")[0].textContent || "0"),
+      parseInt(xml.getElementsByTagName("idAccount")[0].textContent || "0"),
+      xml.getElementsByTagName("isPositive")[0].textContent === "1"
+    );
   }
 }

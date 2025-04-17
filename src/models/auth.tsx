@@ -23,4 +23,13 @@ export class Account {
   }): Account {
     return new Account(json.id, json.user_name, json.email, json.password);
   }
+
+  public static fromXML(xml: Element): Account {
+    return new Account(
+      parseInt(xml.getElementsByTagName("id")[0].textContent || "0"),
+      xml.getElementsByTagName("user_name")[0].textContent || "",
+      xml.getElementsByTagName("email")[0].textContent || "",
+      xml.getElementsByTagName("password")[0].textContent || ""
+    );
+  }
 }
