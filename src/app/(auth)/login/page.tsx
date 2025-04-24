@@ -1,17 +1,29 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import AuthFormWrapper from "../components/AuthFormWrapper";
 import AuthInput from "../components/AuthInput";
 import AuthPasswordInput from "../components/AuthPasswordInput";
 import AuthSubmitButton from "../components/AuthSubmitButton";
 import Link from "next/link";
-
-const SignInPage = () => {
+import LaravelApiClient from "@/api-clients/laravel_client";
+import { XML } from "@/utils/xml";
+import { useRouter } from "next/navigation";
+import { AccessToken } from "@/models/auth";
+import { checkDataInLocal } from "@/utils/local_store";
+const LoginPage = () => {
+  const router = useRouter();
   const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+
+  // Check if user is already logged in and redirect
+  useEffect(() => {
+    if (checkDataInLocal("accessToken")) {
+      router.push("/");
+    }
+  }, [router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -25,14 +37,39 @@ const SignInPage = () => {
     }
 
     try {
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-
-      if (identifier === "test@example.com" && password === "Password123!") {
-        console.log("Login successful");
-        // Redirect here
-      } else {
-        throw new Error("Invalid credentials");
+      const loginXML = `<account>
+          <password>${password}</password>
+          <email>${identifier}</email>
+      </account>`;
+      const response = await LaravelApiClient.publicPost(
+        "/api/auth/login",
+        loginXML
+      );
+      if (!response.ok) {
+        throw new Error("Failed to login");
       }
+
+      const text = await response.text();
+      const xmlDoc = XML.parseXML(text);
+
+      // Extract data from XML
+      const authElement = xmlDoc.getElementsByTagName("auth")[0];
+      const accountId = authElement.getAttribute("accountId") || "";
+
+      const tokenElement = xmlDoc.getElementsByTagName("auth-token")[0];
+      const expiresElement = xmlDoc.getElementsByTagName("expires")[0];
+
+      const authToken = tokenElement?.textContent || "";
+      const expires = expiresElement?.textContent || "";
+
+      const authResult = new AccessToken(
+        accountId,
+        authToken,
+        new Date(expires)
+      );
+      localStorage.setItem("accessToken", JSON.stringify(authResult));
+      console.log("Login successful", authResult);
+      router.push("/");
     } catch (err: unknown) {
       if (err instanceof Error) {
         setError(err.message);
@@ -98,4 +135,4 @@ const SignInPage = () => {
   );
 };
 
-export default SignInPage;
+export default LoginPage;

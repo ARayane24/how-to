@@ -7,6 +7,7 @@ class LaravelApiClient {
   static async get(path: string) {
     const response = await fetch(LaravelApiClient.baseUrl + path, {
       headers: {
+        "Content-Type": "application/xml",
         Authorization: `Bearer ${
           LaravelApiClient.getSessionToken()?.token || ""
         }`,
@@ -15,38 +16,39 @@ class LaravelApiClient {
     return response;
   }
 
-  static async post(path: string, data: unknown) {
+  static async post(path: string, data: string) {
     const response = await fetch(LaravelApiClient.baseUrl + path, {
       method: "POST",
       headers: {
-        "Content-Type": "application/json",
+        "Content-Type": "application/xml",
         Authorization: `Bearer ${LaravelApiClient.getSessionToken()!.token}`,
       },
-      body: JSON.stringify(data),
+      body: data,
     });
     return response;
   }
 
-  static async publicPost(path: string, data: unknown) {
+  static async publicPost(path: string, data: string) {
     console.log("post", LaravelApiClient.baseUrl + path, data);
 
     const response = await fetch(LaravelApiClient.baseUrl + path, {
       method: "POST",
       headers: {
-        "Content-Type": "application/json",
+        "Content-Type": "application/xml",
       },
-      body: JSON.stringify(data),
+      body: data,
+      credentials: "include", // to accept cookies
     });
     return response;
   }
-  static async put(path: string, data: unknown) {
+  static async put(path: string, data: string) {
     const response = await fetch(LaravelApiClient.baseUrl + path, {
       method: "PUT",
       headers: {
-        "Content-Type": "application/json",
+        "Content-Type": "application/xml",
         Authorization: `Bearer ${LaravelApiClient.getSessionToken()!.token}`,
       },
-      body: JSON.stringify(data),
+      body: data,
     });
     return response;
   }
@@ -61,14 +63,14 @@ class LaravelApiClient {
     return response;
   }
 
-  static async patch(path: string, data: unknown) {
+  static async patch(path: string, data: string) {
     const response = await fetch(LaravelApiClient.baseUrl + path, {
       method: "PATCH",
       headers: {
-        "Content-Type": "application/json",
+        "Content-Type": "application/xml",
         Authorization: `Bearer ${LaravelApiClient.getSessionToken()!.token}`,
       },
-      body: JSON.stringify(data),
+      body: data,
     });
     return response;
   }
@@ -89,15 +91,9 @@ class LaravelApiClient {
     const token = LaravelApiClient.getSessionToken();
     const currentTime = new Date(Date.now());
 
-    if (
-      !token ||
-      new Date(token.tokenDateExpired).getTime > currentTime.getTime
-    )
-      return;
+    if (!token || new Date(token.expires).getTime > currentTime.getTime) return;
 
-    const newToken = await LaravelApiClient.publicPost("/refresh", {
-      refresh_token: token.refreshToken,
-    });
+    const newToken = await LaravelApiClient.publicPost("/refresh", token.token);
     const data = await newToken.json();
     if (!newToken.ok) {
       console.error("Error:", data);
@@ -107,7 +103,7 @@ class LaravelApiClient {
     }
 
     token.token = data.access_token;
-    token.tokenDateExpired = new Date(data.expires_at);
+    token.expires = new Date(data.expires_at);
     LaravelApiClient.saveSessionToken(token);
   }
 

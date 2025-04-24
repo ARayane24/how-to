@@ -1,9 +1,8 @@
 export class AccessToken {
   constructor(
+    public accountId: string = "",
     public token: string = "",
-    public refreshToken: string = "",
-    public tokenDateExpired: Date = new Date(),
-    public refreshTokenDateExpired: Date = new Date()
+    public expires: Date = new Date()
   ) {}
 }
 

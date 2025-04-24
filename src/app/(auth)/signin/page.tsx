@@ -1,20 +1,30 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import AuthFormWrapper from "../components/AuthFormWrapper";
 import AuthInput from "../components/AuthInput";
 import AuthPasswordInput from "../components/AuthPasswordInput";
 import PasswordStrengthBar from "../components/PasswordStrengthBar";
 import AuthSubmitButton from "../components/AuthSubmitButton";
 import Link from "next/link";
+import { checkDataInLocal } from "@/utils/local_store";
+import { useRouter } from "next/navigation";
 
-const SignUpPage = () => {
+const SigninPage = () => {
+  const router = useRouter();
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+
+  // Check if user is already logged in and redirect
+  useEffect(() => {
+    if (checkDataInLocal("accessToken")) {
+      router.push("/");
+    }
+  }, [router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -111,4 +121,4 @@ const SignUpPage = () => {
   );
 };
 
-export default SignUpPage;
+export default SigninPage;

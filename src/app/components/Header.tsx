@@ -5,16 +5,22 @@ import { Button } from "@/components/ui/button";
 import { Menu } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Account } from "@/models/auth";
+import { getLocalAccount, getLocalProfile } from "@/utils/local_store";
+import { Profile } from "@/models/user_profiles";
 
 export default function Header() {
   const [account, setAccount] = useState<Account | null>(null);
+  const [profile, setProfile] = useState<Profile | null>(null);
 
   useEffect(() => {
-    const storedUser = localStorage.getItem("account");
-    if (storedUser) {
-      setAccount(JSON.parse(storedUser));
+    const storedUser = getLocalAccount();
+    const storedProfile = getLocalProfile();
+    if (storedUser && storedProfile) {
+      setProfile(storedProfile);
+      setAccount(storedUser);
     } else {
       setAccount(null);
+      setProfile(null);
     }
   }, []);
 
@@ -31,7 +37,7 @@ export default function Header() {
 
         {/* Boutons de connexion et inscription */}
 
-        {!account ? (
+        {!account && !profile ? (
           <div className="flex items-center space-x-4">
             <Button
               asChild
@@ -53,7 +59,21 @@ export default function Header() {
               <Menu className="h-6 w-6" />
             </Button>
           </div>
-        ) : null}
+        ) : (
+          <div className="flex items-center space-x-4">
+            {/* Quick preview of account and profile */}
+            <div className="text-white">
+              <p className="font-bold">
+                Welcome, {profile?.getFullName() || "User"}!
+              </p>
+              <p className="text-sm">Account: {account?.email || "N/A"}</p>
+            </div>
+            {/* Menu mobile */}
+            <Button variant="ghost" className="md:hidden text-blue-600">
+              <Menu className="h-6 w-6" />
+            </Button>
+          </div>
+        )}
       </div>
     </header>
   );
