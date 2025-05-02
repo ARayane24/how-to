@@ -8,6 +8,7 @@ import FloatingButton from "./components/home__components/FloatingButton";
 import LaravelApiClient from "@/api-clients/laravel_client";
 import { XML } from "@/utils/xml";
 import { useRouter } from "next/navigation";
+import { checkDataInLocal } from "@/utils/local_store";
 
 const Home = () => {
   const router = useRouter();
@@ -63,6 +64,7 @@ const Home = () => {
           {topics.map((topic) => (
             <TopicCard
               key={topic.id}
+              isSolved={true}
               topic={topic}
               topicScore={0}
               onClick={() => {
@@ -72,7 +74,11 @@ const Home = () => {
           ))}
         </div>
       </PageWrapper>
-      <FloatingButton onClick={() => {}} />
+      {
+        checkDataInLocal("accessToken") &&
+          (<FloatingButton onClick={() => {}} />)
+      }
+      
     </>
   );
 };
