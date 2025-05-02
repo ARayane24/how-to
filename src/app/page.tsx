@@ -28,7 +28,7 @@ const Home = () => {
 
         const topics = Array.from(xmlDoc.getElementsByTagName("topic")).map(
           (topic) => Topic.fromXML(topic)
-        );
+        ).sort((a: Topic,b: Topic) =>{ return a.createdAt > b.createdAt ? -1:1});
 
         setTopics(topics);
         setLoading(false);

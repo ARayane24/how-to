@@ -28,12 +28,12 @@ export class Topic {
 
   public static fromXML(xml: Element): Topic {
     return new Topic(
-      parseInt(xml.getElementsByTagName("id")[0].textContent || "0"),
-      parseInt(xml.getElementsByTagName("idAccount")[0].textContent || "0"),
-      xml.getElementsByTagName("problem")[0].textContent || "",
-      xml.getElementsByTagName("description")[0].textContent || "",
-      new Date(xml.getElementsByTagName("updatedAt")[0].textContent || ""),
-      new Date(xml.getElementsByTagName("createdAt")[0].textContent || "")
+      parseInt(xml.getAttribute("id") || "0"),
+      parseInt(xml.getAttribute("idAccount") || "0"),
+      xml.getElementsByTagName("problem")[0]?.textContent || "",
+      xml.getElementsByTagName("description")[0]?.textContent || "",
+      new Date(xml.getElementsByTagName("updatedAt")[0]?.textContent || ""),
+      new Date(xml.getElementsByTagName("createdAt")[0]?.textContent || "")
     );
   }
 }
