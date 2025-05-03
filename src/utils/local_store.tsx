@@ -6,7 +6,7 @@ export function checkDataInLocal(key: string) {
     const storedData = localStorage.getItem(key) || null;
     return !!storedData;
   }
-  return false; // Default value for SSR
+  return false; 
 }
 
 export const getLocalProfile = () => {

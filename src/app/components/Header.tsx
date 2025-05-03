@@ -7,8 +7,10 @@ import { useEffect, useState } from "react";
 import { Account } from "@/models/auth";
 import { getLocalAccount, getLocalProfile } from "@/utils/local_store";
 import { Profile } from "@/models/user_profiles";
+import { useRouter } from "next/navigation";
 
 export default function Header() {
+  const router = useRouter();
   const [account, setAccount] = useState<Account | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
 
@@ -60,7 +62,7 @@ export default function Header() {
             </Button>
           </div>
         ) : (
-          <div className="flex items-center space-x-4">
+          <div className="cursor-pointer flex items-center space-x-4" onClick={() => {router.push("/user-profile")}}>
             {/* Quick preview of account and profile */}
             <div className="text-white">
               <p className="font-bold">
