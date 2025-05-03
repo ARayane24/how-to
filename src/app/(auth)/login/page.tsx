@@ -53,11 +53,11 @@ const LoginPage = () => {
       const xmlDoc = XML.parseXML(text);
 
       // Extract data from XML
-      const authElement = xmlDoc.getElementsByTagName("auth")[0];
-      const accountId = authElement.getAttribute("accountId") || "";
+      const authElement = xmlDoc.getElementsByTagName("account")[0];
+      const accountId = authElement.getAttribute("id") || "";
 
-      const tokenElement = xmlDoc.getElementsByTagName("auth-token")[0];
-      const expiresElement = xmlDoc.getElementsByTagName("expires")[0];
+      const tokenElement = xmlDoc.getElementsByTagName("token")[0];
+      const expiresElement = xmlDoc.getElementsByTagName("expiresIn")[0];
 
       const authToken = tokenElement?.textContent || "";
       const expires = expiresElement?.textContent || "";
