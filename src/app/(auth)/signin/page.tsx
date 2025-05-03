@@ -9,6 +9,7 @@ import AuthSubmitButton from "../components/AuthSubmitButton";
 import Link from "next/link";
 import { checkDataInLocal } from "@/utils/local_store";
 import { useRouter } from "next/navigation";
+import LaravelApiClient from "@/api-clients/laravel_client";
 
 const SigninPage = () => {
   const router = useRouter();
@@ -44,11 +45,21 @@ const SigninPage = () => {
     }
 
     try {
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      const loginXML = `
+       <account id="0">
+      <userName>${username}</userName>
+      <password>${password}</password>
+      <email>${email}</email>
+    </account>`;
+      const response = await LaravelApiClient.publicPost(
+        "/v1/create-account",
+        loginXML
+      );
+      if (!response.ok) {
+        throw new Error("Failed to login");
+      }
 
-      // Simulate success
-      console.log("Sign-up successful");
-      // Redirect here
+      router.push("/login"); 
     } catch (err: unknown) {
       if (err instanceof Error) {
         setError(err.message);
