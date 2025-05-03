@@ -52,7 +52,7 @@ const SigninPage = () => {
       <email>${email}</email>
     </account>`;
       const response = await LaravelApiClient.publicPost(
-        "/v1/create-account",
+        "/api/v1/create-account",
         loginXML
       );
       if (!response.ok) {
