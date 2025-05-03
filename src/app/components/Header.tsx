@@ -15,8 +15,11 @@ export default function Header() {
   const [profile, setProfile] = useState<Profile | null>(null);
 
   useEffect(() => {
+    if (account && profile) return
     const storedUser = getLocalAccount();
     const storedProfile = getLocalProfile();
+    console.log("Stored User: ", storedUser);
+    console.log("Stored Profile: ", storedProfile);
     if (storedUser && storedProfile) {
       setProfile(storedProfile);
       setAccount(storedUser);
@@ -24,7 +27,7 @@ export default function Header() {
       setAccount(null);
       setProfile(null);
     }
-  }, []);
+  }, [account, profile]);
 
   return (
     <header className="bg-transparent w-full py-4 px-4 sm:px-6 lg:px-8 from-gray-900 to-gray-800 backdrop-blur-lg fixed top-0 z-50 shadow-md">

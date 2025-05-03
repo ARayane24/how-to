@@ -5,6 +5,8 @@ class LaravelApiClient {
   static key: string = "API_KEY";
 
   static async get(path: string) {
+          
+    console.log("get", LaravelApiClient.baseUrl + path, "   ",LaravelApiClient.getSessionToken()?.token || "");
     const response = await fetch(LaravelApiClient.baseUrl + path, {
       headers: {
         "Content-Type": "application/xml",

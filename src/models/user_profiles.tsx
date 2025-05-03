@@ -38,14 +38,14 @@ export class Profile {
 
   public static fromXML(xml: Element): Profile {
     return new Profile(
-      parseInt(xml.getElementsByTagName("id")[0].textContent || "0"),
-      parseInt(xml.getElementsByTagName("idAccount")[0].textContent || "0"),
-      xml.getElementsByTagName("first_name")[0].textContent || "",
-      xml.getElementsByTagName("mid_name")[0].textContent || "",
-      xml.getElementsByTagName("last_name")[0].textContent || "",
-      new Date(xml.getElementsByTagName("joined")[0].textContent || ""),
-      xml.getElementsByTagName("profile_picture")[0].textContent || "",
-      xml.getElementsByTagName("bio")[0].textContent || ""
+      parseInt(xml.getAttribute("id") || "0"),
+      parseInt(xml.getAttribute("idAccount") || "0"),
+      xml.getElementsByTagName("firstName")[0]?.textContent || "",
+      "", // midName is not present in the XML
+      xml.getElementsByTagName("lastName")[0]?.textContent || "",
+      new Date(xml.getElementsByTagName("joined")[0]?.textContent || ""),
+      xml.getElementsByTagName("profilePicture")[0]?.textContent || "",
+      xml.getElementsByTagName("bio")[0]?.textContent || ""
     );
   }
 }

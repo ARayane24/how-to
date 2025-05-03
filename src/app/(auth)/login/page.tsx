@@ -9,8 +9,30 @@ import Link from "next/link";
 import LaravelApiClient from "@/api-clients/laravel_client";
 import { XML } from "@/utils/xml";
 import { useRouter } from "next/navigation";
-import { AccessToken } from "@/models/auth";
+import { AccessToken, Account } from "@/models/auth";
 import { checkDataInLocal } from "@/utils/local_store";
+import { Profile } from "@/models/user_profiles";
+
+function isEmail(identifier: string): boolean {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return emailRegex.test(identifier);
+}
+
+async function getProfile(id: number) {
+  const profile = await LaravelApiClient.get(`/api/v1/user-profiles/${id}`);
+
+  if (!profile.ok) {
+    throw new Error("Failed to fetch profile");
+  }
+
+  const data = await profile.text();
+
+  console.log("Profile data: ", data);
+  const rootElement = XML.parseXML(data).documentElement;
+  localStorage.setItem("profile", JSON.stringify(Profile.fromXML(rootElement)));
+
+}
+
 const LoginPage = () => {
   const router = useRouter();
   const [identifier, setIdentifier] = useState("");
@@ -37,10 +59,12 @@ const LoginPage = () => {
     }
 
     try {
-      const loginXML = `<account>
+      const loginXML = isEmail(identifier) ? `<account>
           <password>${password}</password>
           <email>${identifier}</email>
-      </account>`;
+      </account>` : `<account>
+      <password>${password}</password>
+      <userName>${identifier}</userName>`;
       const response = await LaravelApiClient.publicPost(
         "/api/auth/login",
         loginXML
@@ -67,7 +91,13 @@ const LoginPage = () => {
         authToken,
         new Date(expires)
       );
+
+
+      const account = isEmail(identifier)? new Account(0,"", identifier, "") : new Account(0, identifier,"", "");
+      localStorage.setItem("account", JSON.stringify(account));
       localStorage.setItem("accessToken", JSON.stringify(authResult));
+      await getProfile(Number(authResult.accountId));
+
       console.log("Login successful", authResult);
       router.push("/");
     } catch (err: unknown) {

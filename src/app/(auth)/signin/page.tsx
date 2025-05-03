@@ -10,6 +10,13 @@ import Link from "next/link";
 import { checkDataInLocal } from "@/utils/local_store";
 import { useRouter } from "next/navigation";
 import LaravelApiClient from "@/api-clients/laravel_client";
+import { Account } from "@/models/auth";
+import { Profile } from "@/models/user_profiles";
+import { XML } from "@/utils/xml";
+import { get } from "http";
+
+
+
 
 const SigninPage = () => {
   const router = useRouter();
@@ -45,6 +52,7 @@ const SigninPage = () => {
     }
 
     try {
+
       const loginXML = `
        <account>
       <userName>${username}</userName>
@@ -58,6 +66,7 @@ const SigninPage = () => {
       if (!response.ok) {
         throw new Error("Failed to login");
       }
+
 
       router.push("/login"); 
     } catch (err: unknown) {
