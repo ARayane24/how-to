@@ -46,7 +46,7 @@ const SigninPage = () => {
 
     try {
       const loginXML = `
-       <account id="0">
+       <account>
       <userName>${username}</userName>
       <password>${password}</password>
       <email>${email}</email>
