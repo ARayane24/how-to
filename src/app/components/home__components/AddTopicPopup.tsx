@@ -1,3 +1,4 @@
+import LaravelApiClient from "@/api-clients/laravel_client";
 import { SolutionStep, Topic } from "@/models/topic";
 import React, { useState } from "react";
 
@@ -30,8 +31,10 @@ const AddTopicPopup: React.FC<AddTopicPopupProps> = ({ isOpen, onClose, onAddTop
       (step) => new SolutionStep(0, 0, step.title, step.description, now)
     );
 
-    console.log("New Topic:", newTopic);
-    console.log("Solution Steps:", solutionSteps);
+    LaravelApiClient.post("/api/v1/topics", Topic.toXML(newTopic));
+    solutionSteps.forEach((step) => {
+      LaravelApiClient.post("/api/v1/{topicId}/steps", SolutionStep.toXML(step));
+    });
 
     onAddTopic(newTopic);
     onClose();

@@ -1,4 +1,14 @@
 export class Topic {
+  static toXML(newTopic: Topic): string {
+    return `
+      <topic id="${newTopic.id}" idAccount="${newTopic.idAccount}">
+        <problem>${newTopic.problem}</problem>
+        <description>${newTopic.description}</description>
+        <updatedAt>${newTopic.updatedAt.toISOString()}</updatedAt>
+        <createdAt>${newTopic.createdAt.toISOString()}</createdAt>
+      </topic>
+    `;
+  }
   constructor(
     public id: number = 0,
     public idAccount: number = 0,
@@ -39,6 +49,15 @@ export class Topic {
 }
 
 export class SolutionStep {
+  static toXML(step: SolutionStep): string {
+    return `
+      <solutionStep id="${step.id}" idTopic="${step.idTopic}">
+        <title>${step.title}</title>
+        <description>${step.description}</description>
+        <updatedAt>${step.updatedAt.toISOString()}</updatedAt>
+      </solutionStep>
+    `;
+  }
   constructor(
     public id: number = 0,
     public idTopic: number = 0,
