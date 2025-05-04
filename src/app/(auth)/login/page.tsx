@@ -93,7 +93,7 @@ const LoginPage = () => {
       );
 
 
-      const account = isEmail(identifier)? new Account(0,"", identifier, "") : new Account(0, identifier,"", "");
+      const account = isEmail(identifier)? new Account(Number(authResult.accountId), "", identifier, "") : new Account(Number(authResult.accountId), identifier, "", "");
       localStorage.setItem("account", JSON.stringify(account));
       localStorage.setItem("accessToken", JSON.stringify(authResult));
       await getProfile(Number(authResult.accountId));

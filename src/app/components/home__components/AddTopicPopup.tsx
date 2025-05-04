@@ -1,5 +1,7 @@
 import LaravelApiClient from "@/api-clients/laravel_client";
 import { SolutionStep, Topic } from "@/models/topic";
+import { getLocalAccount } from "@/utils/local_store";
+import { XML } from "@/utils/xml";
 import React, { useState } from "react";
 
 interface AddTopicPopupProps {
@@ -23,7 +25,7 @@ const AddTopicPopup: React.FC<AddTopicPopupProps> = ({ isOpen, onClose, onAddTop
     setSteps(updatedSteps);
   };
 
-  const handleAddTopic = () => {
+  const handleAddTopic = async () => {
     const now = new Date();
     const newTopic = new Topic(0, 0, problem, description, now, now);
 
@@ -31,11 +33,20 @@ const AddTopicPopup: React.FC<AddTopicPopupProps> = ({ isOpen, onClose, onAddTop
       (step) => new SolutionStep(0, 0, step.title, step.description, now)
     );
 
-    LaravelApiClient.post("/api/v1/topics", Topic.toXML(newTopic));
+    newTopic.idAccount = getLocalAccount()?.id || -1;
+
+    const  result =  await  LaravelApiClient.post("/api/v1/topics", Topic.toXML(newTopic));
+    if (!result.ok) {
+      console.error("Failed to add topic");
+      return;
+    }
+    const data = await result.text();
+    const topic = Topic.fromXML(XML.parseXML(data).documentElement);
     solutionSteps.forEach((step) => {
-      LaravelApiClient.post("/api/v1/{topicId}/steps", SolutionStep.toXML(step));
+      LaravelApiClient.post("/api/v1/topics/"+topic.id+"/steps", SolutionStep.toXML(step));
     });
 
+    newTopic.id = topic.id;
     onAddTopic(newTopic);
     onClose();
   };

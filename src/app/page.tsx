@@ -108,7 +108,7 @@ const Home = () => {
       {isAddTopicOpen && (
         <AddTopicPopup
           isOpen={true}
-          onClose={() => setIsAddTopicOpen(false)}
+          onClose={() => {setIsAddTopicOpen(false); }}
           onAddTopic={(topic) => {
             setTopics((prev) => [topic, ...prev]);
           }}

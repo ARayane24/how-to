@@ -1,7 +1,7 @@
 export class Topic {
   static toXML(newTopic: Topic): string {
     return `
-      <topic id="${newTopic.id}" idAccount="${newTopic.idAccount}">
+      <topic idAccount="${newTopic.idAccount}">
         <problem>${newTopic.problem}</problem>
         <description>${newTopic.description}</description>
         <updatedAt>${newTopic.updatedAt.toISOString()}</updatedAt>
