@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import { Loader2, AlertCircle, Search } from "lucide-react";
-import { Topic } from "@/models/topic";
+import { SolutionStep, Topic } from "@/models/topic";
 import PageWrapper from "./(main)/components/PageWrapper";
 import TopicCard from "./components/home__components/TopicCard";
 import FloatingButton from "./components/home__components/FloatingButton";
@@ -20,6 +20,27 @@ const Home = () => {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    const countSolutionStep = async (id : string) => {
+      try {
+        const response = await LaravelApiClient.get("/api/v1/topics/"+id+"/steps");
+        if (!response.ok) {
+          throw new Error("Failed to fetch steps");
+        }
+
+        const text = await response.text();
+        const xmlDoc = XML.parseXML(text);
+
+        const topics = Array.from(xmlDoc.getElementsByTagName("step"))
+          .map((step) => SolutionStep.fromXML(step));
+
+        
+
+       return topics.length;
+      } catch (err) {
+        setError(err?.toString() + " : Failed to fetch steps.");
+      }
+      return 0;
+    };
     const fetchData = async () => {
       try {
         const response = await LaravelApiClient.get("/api/v1/topics");
@@ -30,10 +51,18 @@ const Home = () => {
         const text = await response.text();
         const xmlDoc = XML.parseXML(text);
 
-        const topics = Array.from(xmlDoc.getElementsByTagName("topic"))
-          .map((topic) => Topic.fromXML(topic))
-          .sort((a, b) => (a.createdAt > b.createdAt ? -1 : 1));
+        const topics = await Promise.all(
+          Array.from(xmlDoc.getElementsByTagName("topic"))
+            .map((topic) => Topic.fromXML(topic))
+            .sort((a, b) => (a.createdAt > b.createdAt ? -1 : 1))
+            .map(async (topic) => {
+              const hasbeenSolved = await countSolutionStep(topic.id.toString());
+              topic.hasbeenSolved = hasbeenSolved > 0;
+              return topic;
+            })
+        );
 
+        console.log("Topics: ", topics);
         setTopics(topics);
         setLoading(false);
       } catch (err) {
@@ -84,17 +113,22 @@ const Home = () => {
 
         <div className="space-y-6">
           {filteredTopics.length > 0 ? (
-            filteredTopics.map((topic) => (
+            filteredTopics.map((topic) => {
+              
+              return (
+                (
               <TopicCard
                 key={topic.id}
-                isSolved={true}
+                isSolved={topic.hasbeenSolved}
                 topic={topic}
                 topicScore={0}
                 onClick={() => {
                   router.push(`/topic-details?topicId=${topic.id}`);
                 }}
               />
-            ))
+            )
+              );
+            })
           ) : (
             <p className="text-gray-500 italic">No topics match your search.</p>
           )}

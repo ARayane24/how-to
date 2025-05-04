@@ -15,7 +15,8 @@ export class Topic {
     public problem: string = "",
     public description: string = "",
     public updatedAt: Date,
-    public createdAt: Date
+    public createdAt: Date,
+    public hasbeenSolved: boolean = false,
   ) {}
 
   public static fromJson(json: {
@@ -84,8 +85,8 @@ export class SolutionStep {
 
   public static fromXML(xml: Element): SolutionStep {
     return new SolutionStep(
-      parseInt(xml.getElementsByTagName("id")[0].textContent || "0"),
-      parseInt(xml.getElementsByTagName("idTopic")[0].textContent || "0"),
+      parseInt(xml.getAttribute("id") || "0"),
+      parseInt(xml.getAttribute("idTopic") || "0"),
       xml.getElementsByTagName("title")[0].textContent || "",
       xml.getElementsByTagName("description")[0].textContent || "",
       new Date(xml.getElementsByTagName("updatedAt")[0].textContent || "")
@@ -94,6 +95,13 @@ export class SolutionStep {
 }
 
 export class Vote {
+  static toXML(arg0: Vote): string {
+    return `
+      <vote idAccount="${arg0.idAccount}">
+        <isPositive>${arg0.isPositive}</isPositive>
+      </vote>
+    `;
+  }
   constructor(
     public id: number = 0,
     public idTopic: number = 0,

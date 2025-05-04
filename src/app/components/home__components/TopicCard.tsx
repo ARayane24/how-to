@@ -2,11 +2,13 @@ import { Calendar, MessageSquare, ThumbsUp, ThumbsDown } from "lucide-react";
 import { motion } from "framer-motion";
 import { formatDistanceToNow } from "date-fns";
 import { Button } from "@/components/ui/button";
-import { useState } from "react";
-import { Topic } from "@/models/topic";
-import { checkDataInLocal } from "@/utils/local_store";
+import { use, useEffect, useState } from "react";
+import { Topic, Vote } from "@/models/topic";
+import { checkDataInLocal, getLocalAccount } from "@/utils/local_store";
 import LoginPopup from "./LoginPopup";
 import { useRouter } from "next/navigation";
+import LaravelApiClient from "@/api-clients/laravel_client";
+import { XML } from "@/utils/xml";
 
 const TopicCard = ({
   topic,
@@ -22,22 +24,142 @@ const TopicCard = ({
   const router = useRouter();
   const [score, setScore] = useState<number>(topicScore || 0);
   const [showLoginPopup, setShowLoginPopup] = useState(false);
+  const [voteId, setVoteId] = useState<Number>(-1);
 
-  const handleUpvote = () =>
-    setScore((prev) => {
-      if (checkDataInLocal("accessToken")) return prev + 1;
+  const [userVoteType, setuserVoteType] = useState<"positive" | "negative" | null>(null);
 
-      handleUserNotLoggedIn();
-      return prev;
+  const checkVote = async () => {
+    const response = await LaravelApiClient.get(
+      "/api/v1/votes/topic/" + topic.id
+    );
+
+    if (!response.ok) {
+      throw new Error("Failed to fetch votes");
+    }
+
+    const xmlText = await response.text();
+
+    // Parse XML
+    const parser = new DOMParser();
+    const xmlDoc = parser.parseFromString(xmlText, "application/xml");
+
+    // Get all <vote> elements
+    const voteNodes = xmlDoc.querySelectorAll("vote");
+
+    const currentAccountId = getLocalAccount()?.id || -1;
+
+    voteNodes.forEach((vote) => {
+      const idAccount = vote.getAttribute("idAccount");
+      if (idAccount === String(currentAccountId)) {
+        setVoteId(parseInt(vote.getAttribute("id") || "-1"));
+        const isPositiveText = vote
+          .querySelector("isPositive")
+          ?.textContent?.trim();
+        if (isPositiveText === "true") {
+          setuserVoteType("positive");
+        } else if (isPositiveText === "false") {
+          setuserVoteType( "negative");
+        }
+      }
     });
 
-  const handleDownvote = () =>
-    setScore((prev) => {
-      if (checkDataInLocal("accessToken")) return prev - 1;
+    console.log("Vote ID: ", voteId);
+    console.log("User Vote Type: ", userVoteType);
+    console.log("Current Account ID: ", currentAccountId);
+    console.log("Vote Nodes: ", xmlText);
+  };
 
+  const getScore = async () => {
+    const response = await LaravelApiClient.get(
+      "/api/v1/votes/topic/" + topic.id
+    );
+
+    if (!response.ok) {
+      throw new Error("Failed to fetch votes");
+    }
+
+    const xmlText = await response.text();
+
+    // Parse XML string to DOM
+    const parser = new DOMParser();
+    const xmlDoc = parser.parseFromString(xmlText, "application/xml");
+
+    // Extract the <total> tag
+    const upVotes = xmlDoc.querySelector("voteCounts > upVotes");
+    const downVotes = xmlDoc.querySelector("voteCounts > downVotes");
+
+    if (
+      !upVotes ||
+      isNaN(parseInt(upVotes.textContent || "")) ||
+      !downVotes ||
+      isNaN(parseInt(downVotes.textContent || ""))
+    ) {
+      throw new Error("Invalid vote count in XML response");
+    }
+
+    const totalVotes =
+      parseInt(upVotes.textContent!) - parseInt(downVotes.textContent!);
+    setScore(totalVotes);
+  };
+  useEffect(() => {
+    checkVote();
+    getScore();
+  }, []);
+
+  const vote = async (vote: boolean) => {
+    const response = await LaravelApiClient.post(
+      "/api/v1/topics/" + topic.id + "/vote",
+      Vote.toXML(new Vote(0, topic.id, getLocalAccount()?.id || -1, vote))
+    );
+
+    if (!response.ok) {
+      throw new Error("Failed to fetch votes");
+    }
+    getScore();
+    checkVote();
+  };
+
+  const unVote = async () => {
+    const response = await LaravelApiClient.delete(
+      "/api/v1/votes/" + voteId
+    );
+    if (!response.ok) {
+      throw new Error("Failed to fetch votes");
+    }
+  }
+
+  const handleUpvote = async () => {
+      if (checkDataInLocal("accessToken")) {
+      if (voteId === -1 || userVoteType === "negative") {
+        await vote(true);
+        setScore((prev) => prev + 1);
+      } else {
+        if (userVoteType === "positive") {
+          await unVote();
+          setScore((prev) => prev - 1);
+        }
+        setVoteId(-1);
+      }
+    } else {
       handleUserNotLoggedIn();
-      return prev;
-    });
+    }
+  }
+  const handleDownvote = async () => {
+    if (checkDataInLocal("accessToken")) {
+    if (voteId === -1 || userVoteType === "positive") {
+      await vote(false);
+      setScore((prev) => prev - 1);
+    } else {
+      if (userVoteType === "negative") {
+        await unVote();
+        setScore((prev) => prev + 1);
+      }
+      setVoteId(-1);
+    }
+  } else {
+    handleUserNotLoggedIn();
+  }
+};
 
   const handleUserNotLoggedIn = () => {
     setShowLoginPopup(true);

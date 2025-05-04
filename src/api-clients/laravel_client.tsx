@@ -63,6 +63,7 @@ class LaravelApiClient {
         Authorization: `Bearer ${LaravelApiClient.getSessionToken()!.token}`,
       },
     });
+    console.log("Delete response: ");
     return response;
   }
 
