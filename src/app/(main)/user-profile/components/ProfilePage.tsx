@@ -21,7 +21,7 @@ const ProfilePage = ({
   >
     <div className="bg-gray-800/50 rounded-xl p-6 space-y-6 shadow-lg border border-gray-700">
       <div className="flex items-center gap-4">
-        {profile.profilePicture ? (
+        {profile?.profilePicture ? (
           <Image
             src={profile.profilePicture || "/holder_profile_image.svg"}
             alt="Profile"
@@ -34,10 +34,10 @@ const ProfilePage = ({
         )}
         <div>
           <h3 className="text-xl font-semibold text-white">
-            {profile.getFullName()}
+            {profile?.getFullName()}
           </h3>
           <p className="text-gray-400">
-            Joined: {format(profile.joined, "MMMM dd, yyyy")}
+            Joined: {profile ? format(profile.joined, "MMMM dd, yyyy") : "N/A"}
           </p>
         </div>
       </div>
@@ -47,11 +47,11 @@ const ProfilePage = ({
         </h4>
         <p className="text-gray-300">
           <span className="font-medium text-gray-400">Username: </span>
-          {profile.firstName}
+          {profile?.firstName}
         </p>
         <p className="text-gray-300">
           <span className="font-medium text-gray-400">Bio: </span> <br />
-          {profile.bio}
+          {profile?.bio}
         </p>
       </div>
       <div className="flex gap-4">

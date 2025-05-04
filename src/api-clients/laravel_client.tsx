@@ -44,6 +44,7 @@ class LaravelApiClient {
     return response;
   }
   static async put(path: string, data: string) {
+    console.log(data)
     const response = await fetch(LaravelApiClient.baseUrl + path, {
       method: "PUT",
       headers: {

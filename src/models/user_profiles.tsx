@@ -13,9 +13,9 @@ export class Profile {
   public static fromJson(json: {
     id: number;
     idAccount: number;
-    first_name: string;
-    mid_name: string;
-    last_name: string;
+    firstName: string;
+    midName: string;
+    lastName: string;
     joined: string;
     profile_picture: string;
     bio: string;
@@ -23,9 +23,9 @@ export class Profile {
     return new Profile(
       json.id,
       json.idAccount,
-      json.first_name,
-      json.mid_name,
-      json.last_name,
+      json.firstName,
+      json.midName,
+      json.lastName,
       new Date(json.joined),
       json.profile_picture,
       json.bio
@@ -47,5 +47,17 @@ export class Profile {
       xml.getElementsByTagName("profilePicture")[0]?.textContent || "",
       xml.getElementsByTagName("bio")[0]?.textContent || ""
     );
+  }
+
+  public static toXML(profile : Profile){
+    return `
+     <userProfile id="${profile.id}" idAccount="${profile.idAccount}">
+      <firstName>${profile.firstName}</firstName>
+      <lastName>${profile.lastName}</lastName>
+      <profilePicture>${profile.profilePicture} </profilePicture>
+      <bio>${profile.bio}</bio>
+      <joined>${profile.joined}</joined>
+    </userProfile>
+    `;
   }
 }

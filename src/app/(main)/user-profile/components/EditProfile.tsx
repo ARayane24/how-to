@@ -6,6 +6,7 @@ import PageWrapper from "../../components/PageWrapper";
 import { AlertCircle, Save, User, X } from "lucide-react";
 import FormInput from "../../components/FormInput";
 import ActionButton from "../../components/ActionButton";
+import { useRouter } from "next/navigation";
 
 const EditProfilePage = ({
   profile,
@@ -16,6 +17,7 @@ const EditProfilePage = ({
   onSave: (updatedProfile: Profile) => void;
   onCancel: () => void;
 }) => {
+    const router = useRouter();
   const [firstName, setFirstName] = useState(profile.firstName);
   const [midName, setMidName] = useState(profile.midName);
   const [lastName, setLastName] = useState(profile.lastName);
@@ -122,7 +124,7 @@ const EditProfilePage = ({
             onClick={handleSave}
             className="flex-1 bg-green-500/20 text-green-300 hover:bg-green-500/30 hover:text-green-200"
           >
-            <Save className="mr-2 w-4 h-4" /> Save
+            <Save className="mr-2 w-4 h-4" onClick={() => {router.push("/user-profile")}} /> Save
           </ActionButton>
           <ActionButton
             onClick={onCancel}
