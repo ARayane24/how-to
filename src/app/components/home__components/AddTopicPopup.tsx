@@ -5,14 +5,17 @@ import { XML } from "@/utils/xml";
 import React, { useState } from "react";
 
 interface AddTopicPopupProps {
+  fixedProblem: string;
+  fixedDescription: string;
+  fixedID: number | null;
   isOpen: boolean;
   onClose: () => void;
   onAddTopic: (topic: Topic) => void;
 }
 
-const AddTopicPopup: React.FC<AddTopicPopupProps> = ({ isOpen, onClose, onAddTopic }) => {
-  const [problem, setProblem] = useState("");
-  const [description, setDescription] = useState("");
+const AddTopicPopup: React.FC<AddTopicPopupProps> = ({fixedID,fixedProblem,fixedDescription,isOpen, onClose, onAddTopic }) => {
+  const [problem, setProblem] = useState(fixedProblem);
+  const [description, setDescription] = useState(fixedDescription);
   const [steps, setSteps] = useState<Array<{ title: string; description: string }>>([]);
 
   const handleAddStep = () => {
@@ -33,20 +36,26 @@ const AddTopicPopup: React.FC<AddTopicPopupProps> = ({ isOpen, onClose, onAddTop
       (step) => new SolutionStep(0, 0, step.title, step.description, now)
     );
 
-    newTopic.idAccount = getLocalAccount()?.id || -1;
 
-    const  result =  await  LaravelApiClient.post("/api/v1/topics", Topic.toXML(newTopic));
-    if (!result.ok) {
-      console.error("Failed to add topic");
-      return;
+    if (fixedID === null) {
+      newTopic.idAccount = getLocalAccount()?.id || -1;
+
+      const  result =  await  LaravelApiClient.post("/api/v1/topics", Topic.toXML(newTopic));
+      if (!result.ok) {
+        console.error("Failed to add topic");
+        return;
+      }
+      const data = await result.text();
+      const topic = Topic.fromXML(XML.parseXML(data).documentElement);
+      fixedID = topic.id;
     }
-    const data = await result.text();
-    const topic = Topic.fromXML(XML.parseXML(data).documentElement);
+    
     solutionSteps.forEach((step) => {
-      LaravelApiClient.post("/api/v1/topics/"+topic.id+"/steps", SolutionStep.toXML(step));
+      LaravelApiClient.post("/api/v1/topics/"+fixedID+"/steps", SolutionStep.toXML(step));
     });
 
-    newTopic.id = topic.id;
+    newTopic.id = fixedID!;
+    newTopic.hasbeenSolved = steps.length > 0;
     onAddTopic(newTopic);
     onClose();
   };
@@ -66,6 +75,8 @@ const AddTopicPopup: React.FC<AddTopicPopupProps> = ({ isOpen, onClose, onAddTop
             onChange={(e) => setProblem(e.target.value)}
             className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring focus:border-blue-400"
             required
+            placeholder="Enter the problem"
+            readOnly={!!fixedProblem}
           />
         </div>
 
@@ -76,6 +87,8 @@ const AddTopicPopup: React.FC<AddTopicPopupProps> = ({ isOpen, onClose, onAddTop
             onChange={(e) => setDescription(e.target.value)}
             className="w-full px-3 py-2 border rounded-lg resize-none focus:outline-none focus:ring focus:border-blue-400"
             required
+            placeholder="Enter the description"
+            readOnly={!!fixedDescription}
           />
         </div>
 

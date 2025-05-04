@@ -57,13 +57,13 @@ class LaravelApiClient {
   }
 
   static async delete(path: string) {
+    console.log("delete : ", LaravelApiClient.baseUrl + path);
     const response = await fetch(LaravelApiClient.baseUrl + path, {
       method: "DELETE",
       headers: {
         Authorization: `Bearer ${LaravelApiClient.getSessionToken()!.token}`,
       },
     });
-    console.log("Delete response: ");
     return response;
   }
 

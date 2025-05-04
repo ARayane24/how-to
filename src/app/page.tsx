@@ -10,6 +10,7 @@ import { XML } from "@/utils/xml";
 import { useRouter } from "next/navigation";
 import { checkDataInLocal } from "@/utils/local_store";
 import AddTopicPopup from "./components/home__components/AddTopicPopup";
+import { set } from "date-fns";
 
 const Home = () => {
   const router = useRouter();
@@ -18,6 +19,10 @@ const Home = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [fixedDescription, setFixedDescription] = useState("");
+  const [fixedProblem, setFixedProblem] = useState("");
+  const [fixedID, setFixedID] = useState<number | null>(null);
+
 
   useEffect(() => {
     const countSolutionStep = async (id : string) => {
@@ -125,6 +130,10 @@ const Home = () => {
                 onClick={() => {
                   router.push(`/topic-details?topicId=${topic.id}`);
                 }}
+                topicDeleted={() => {
+                  setTopics((prev) => prev.filter((t) => t.id !== topic.id));
+                }}
+                addSolutionStep={() => {setFixedID(topic.id);setFixedDescription(topic.description);setFixedProblem(topic.problem);setIsAddTopicOpen(true);}}
               />
             )
               );
@@ -141,9 +150,19 @@ const Home = () => {
 
       {isAddTopicOpen && (
         <AddTopicPopup
+          fixedID={fixedID}
+          fixedProblem={fixedProblem}
+          fixedDescription={fixedDescription}
           isOpen={true}
           onClose={() => {setIsAddTopicOpen(false); }}
           onAddTopic={(topic) => {
+            if (fixedProblem !== "") {
+              setTopics(topics.map((t) => {if (t.id === topic.id) {return topic} return t;}));
+              setFixedProblem("");
+              setFixedDescription("");
+              setFixedID(null)
+              return
+            }
             setTopics((prev) => [topic, ...prev]);
           }}
         />
